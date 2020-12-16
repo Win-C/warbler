@@ -50,7 +50,7 @@ def do_logout():
     """Logout user."""
 
     if CURR_USER_KEY in session:
-        del session[CURR_USER_KEY]
+        session.pop(CURR_USER_KEY, None)
 
 
 @app.route('/signup', methods=["GET", "POST"])
@@ -113,7 +113,12 @@ def login():
 def logout():
     """Handle logout of user."""
 
-    # IMPLEMENT THIS
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    do_logout()
+    return redirect("/")
 
 
 ##############################################################################
@@ -131,7 +136,7 @@ def list_users():
     if not search:
         users = User.query.all()
     else:
-        users = User.query.filter(User.username.like(f"%{search}%")).all()
+        users = User.query.filter(User.username.ilike(f"%{search}%")).all()
 
     return render_template('users/index.html', users=users)
 
