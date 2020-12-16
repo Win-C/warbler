@@ -108,8 +108,8 @@ def login():
 
     return render_template('users/login.html', form=form)
 
-
-@app.route('/logout')
+# TODO: make a WTForm with no fields and validate for CSRF protection
+@app.route('/logout', methods=["POST"])
 def logout():
     """Handle logout of user."""
 
@@ -220,11 +220,12 @@ def profile():
         if User.authenticate(curr_username, form.password.data):
             g.user.username = form.username.data
             g.user.email = form.email.data
-            g.user.image_url = form.image_url.data
-            g.user.header_image_url = form.header_image_url.data
+            g.user.image_url = form.image_url.data or None
+            g.user.header_image_url = form.header_image_url.data or None
             g.user.bio = form.bio.data
             g.user.location = form.location.data
             db.session.commit()
+
             flash("User has been edited!", "success")
             return redirect(f"/users/{g.user.id}")
         else:

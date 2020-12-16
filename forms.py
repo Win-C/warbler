@@ -32,8 +32,15 @@ class LoginForm(FlaskForm):
 class UserEditForm(FlaskForm):
     """ Form for editing user info """
 
-    username = StringField('Username', validators=[DataRequired()])
-    email = StringField('E-mail', validators=[DataRequired(), Email()])
+    # TODO: Add validation for max length for fields
+    username = StringField(
+        'Username',
+        validators=[DataRequired()]
+        )
+    email = StringField(
+        'E-mail',
+        validators=[DataRequired(), Email()]
+        )
     image_url = StringField(
         '(Optional) Image URL',
         validators=[Optional()],
@@ -42,7 +49,6 @@ class UserEditForm(FlaskForm):
         '(Optional) Header Image URL',
         validators=[Optional()],
     )
-
     bio = TextAreaField(
         'Bio',
         render_kw={'class': 'form-control', 'rows': 10},
