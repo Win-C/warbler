@@ -114,7 +114,7 @@ def logout():
     """Handle logout of user."""
 
     if not g.user:
-        flash("Access unauthorized.", "danger")
+        flash("You are not logged in.", "danger")
         return redirect("/")
 
     do_logout()
