@@ -44,7 +44,7 @@ class User(db.Model):
     )
 
     username = db.Column(
-        db.Text,
+        db.String(20),
         nullable=False,
         unique=True,
     )
@@ -68,13 +68,13 @@ class User(db.Model):
     )
 
     location = db.Column(
-        db.Text,
+        db.String(50),
         nullable=False,
         default="Location"
     )
 
     password = db.Column(
-        db.Text,
+        db.String(20),
         nullable=False,
     )
 

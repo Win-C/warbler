@@ -4,10 +4,18 @@ from flask import Flask, render_template, request, flash, redirect, session, g
 from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
 
-from forms import UserAddForm, LoginForm, MessageForm, UserEditForm
+from forms import (
+    UserAddForm,
+    LoginForm,
+    MessageForm,
+    UserEditForm,
+    UserLogoutForm,
+)
 from models import db, connect_db, User, Message
 
 CURR_USER_KEY = "curr_user"
+DEFAULT_IMAGE_URL = "/static/images/default-pic.png"
+DEFAULT_HEADER_IMAGE_URL = "/static/images/warbler-hero.jpg"
 
 app = Flask(__name__)
 
@@ -109,7 +117,7 @@ def login():
     return render_template('users/login.html', form=form)
 
 # TODO: make a WTForm with no fields and validate for CSRF protection
-@app.route('/logout', methods=["POST"])
+@app.route('/logout', methods=["GET", "POST"])
 def logout():
     """Handle logout of user."""
 
@@ -117,8 +125,14 @@ def logout():
         flash("You are not logged in.", "danger")
         return redirect("/")
 
-    do_logout()
-    return redirect("/")
+    form = UserLogoutForm()
+
+    if form.validate_on_submit():
+        do_logout()
+        flash("You are logged out.", "success")
+        return redirect("/")
+
+    return render_template("users/logout.html", form=form)
 
 
 ##############################################################################
@@ -220,8 +234,14 @@ def profile():
         if User.authenticate(curr_username, form.password.data):
             g.user.username = form.username.data
             g.user.email = form.email.data
-            g.user.image_url = form.image_url.data or None
-            g.user.header_image_url = form.header_image_url.data or None
+            g.user.image_url = (
+                form.image_url.data or
+                DEFAULT_IMAGE_URL
+            )
+            g.user.header_image_url = (
+                form.header_image_url.data or
+                DEFAULT_HEADER_IMAGE_URL
+            )
             g.user.bio = form.bio.data
             g.user.location = form.location.data
             db.session.commit()
@@ -252,6 +272,12 @@ def delete_user():
 
 ##############################################################################
 # Messages routes:
+
+@app.route('/messages/liked')
+def messages_liked():
+    """  """
+
+    ...
 
 @app.route('/messages/new', methods=["GET", "POST"])
 def messages_add():

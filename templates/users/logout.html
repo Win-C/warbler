@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block body_class %}onboarding{% endblock %}
+
+{% block content %}
+
+<div class="card text-center">
+  <div class="card-header">
+    <p>Are you sure you want to log out?</p>
+  </div>
+  <div class="card-body">
+    <form action="/logout" method="POST">
+      {{ form.hidden_tag() }} <!--add type=hidden form fields -->
+      <button class="btn btn-outline-danger" type="submit">Logout</button>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

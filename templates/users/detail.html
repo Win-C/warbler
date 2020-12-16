@@ -33,7 +33,10 @@
             </li>
             <li class="stat">
               <p class="small">Likes</p>
-              <h4>TBD</h4>
+              <!-- TODO: Finish jinja template -->
+              <h4>
+                <a href="/messages/liked">{{ user. | length }}</a>
+              </h4>
             </li>
             <div class="ml-auto">
               {% if g.user.id == user.id %}

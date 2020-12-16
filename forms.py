@@ -7,26 +7,44 @@ from email_validator import validate_email, EmailNotValidError
 class MessageForm(FlaskForm):
     """Form for adding/editing messages."""
 
-    text = TextAreaField('text', validators=[DataRequired()])
+    text = TextAreaField(
+        'text',
+        validators=[DataRequired(), Length(max=140)],
+        )
 
 
 class UserAddForm(FlaskForm):
     """Form for adding users."""
 
-    username = StringField('Username', validators=[DataRequired()])
-    email = StringField('E-mail', validators=[DataRequired(), Email()])
-    password = PasswordField('Password', validators=[Length(min=6)])
+    username = StringField(
+        'Username',
+        validators=[DataRequired(), Length(max=20)],
+        )
+    email = StringField(
+        'E-mail',
+        validators=[DataRequired(), Email()],
+        )
+    password = PasswordField(
+        'Password',
+        validators=[Length(min=6, max=20)],
+        )
     image_url = StringField(
         '(Optional) Image URL',
-        validators=[Optional(), URL()]
+        validators=[Optional(), URL()],
     )
 
 
 class LoginForm(FlaskForm):
     """Login form."""
 
-    username = StringField('Username', validators=[DataRequired()])
-    password = PasswordField('Password', validators=[Length(min=6)])
+    username = StringField(
+        'Username',
+        validators=[DataRequired(), Length(max=20)],
+        )
+    password = PasswordField(
+        'Password',
+        validators=[Length(min=6, max=20)],
+        )
 
 
 class UserEditForm(FlaskForm):
@@ -35,11 +53,11 @@ class UserEditForm(FlaskForm):
     # TODO: Add validation for max length for fields
     username = StringField(
         'Username',
-        validators=[DataRequired()]
+        validators=[DataRequired(), Length(max=20)],
         )
     email = StringField(
         'E-mail',
-        validators=[DataRequired(), Email()]
+        validators=[DataRequired(), Email()],
         )
     image_url = StringField(
         '(Optional) Image URL',
@@ -56,9 +74,13 @@ class UserEditForm(FlaskForm):
     )
     location = StringField(
         'Location',
-        validators=[DataRequired()]
+        validators=[DataRequired(), Length(max=20)],
     )
     password = PasswordField(
         'Password',
-        validators=[DataRequired(), Length(min=6)],
-    )
+        validators=[Length(min=6, max=20)]
+        )
+
+
+class UserLogoutForm(FlaskForm):
+    """ Left empty for CSRF protection and caching. """
