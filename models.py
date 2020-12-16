@@ -63,10 +63,14 @@ class User(db.Model):
 
     bio = db.Column(
         db.Text,
+        nullable=False,
+        default="Story has yet to be written..."
     )
 
     location = db.Column(
         db.Text,
+        nullable=False,
+        default="Location"
     )
 
     password = db.Column(
