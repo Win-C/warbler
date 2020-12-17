@@ -274,11 +274,8 @@ def delete_user():
 
     do_logout()
 
-    # g.user.messages_liked.clear()
-    # db.session.query(UserMessage.user_id).filter_by(user_id=g.user.id).delete()
-    # db.session.flush()
-    # print("messages_liked", g.user.messages_liked)
-
+    db.session.query(Message).filter_by(user_id=g.user.id).delete()
+    db.session.flush()
     db.session.delete(g.user)
     db.session.commit()
 

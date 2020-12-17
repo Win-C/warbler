@@ -192,12 +192,12 @@ class UserMessage(db.Model):
 
     user_id = db.Column(
         db.Integer,
-        db.ForeignKey('users.id'),
+        db.ForeignKey('users.id', ondelete='CASCADE'),
         primary_key=True
     )
     message_id = db.Column(
         db.Integer,
-        db.ForeignKey('messages.id'),
+        db.ForeignKey('messages.id', ondelete='CASCADE'),
         primary_key=True
     )
 
