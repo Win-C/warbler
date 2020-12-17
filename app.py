@@ -19,7 +19,7 @@ from forms import (
     UserLogoutForm,
     UserMessageLikeForm,
 )
-from models import db, connect_db, User, Message, UserMessage
+from models import db, connect_db, User, Message
 
 CURR_USER_KEY = "curr_user"
 DEFAULT_IMAGE_URL = "/static/images/default-pic.png"
@@ -316,7 +316,12 @@ def messages_show(message_id):
 
     msg = Message.query.get(message_id)
     user = User.query.get_or_404(msg.user.id)
-    return render_template('messages/show.html', form=form, message=msg, user=user)
+    return render_template(
+        'messages/show.html',
+        form=form,
+        message=msg,
+        user=user,
+    )
 
 
 @app.route('/messages/<int:message_id>/delete', methods=["POST"])
@@ -358,23 +363,17 @@ def message_like(message_id):
 
     # Check if message exists
     message = Message.query.get_or_404(message_id)
-    print("message =", message)
 
     # Check if user message, user cannot like own message
     if message.user_id == g.user.id:
         flash("Cannot like your own message", "danger")
         return redirect('/messages/liked')
 
-    print("messages liked=", g.user.messages_liked)
-    # breakpoint()
     # Check if message is not already liked
     if message not in g.user.messages_liked:
-        print("message not in messages liked")
         if form.validate_on_submit():
             g.user.messages_liked.append(message)
             db.session.commit()
-            print("message added to liked=", g.user.messages_liked)
-            # breakpoint()
             flash("Message liked!", "success")
             return redirect('/messages/liked')
 

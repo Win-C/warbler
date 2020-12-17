@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, TextAreaField
-from wtforms.validators import DataRequired, InputRequired, Email, Length, URL, Optional
+from wtforms.validators import DataRequired, Email, Length, URL, Optional
 from email_validator import validate_email, EmailNotValidError
 
 
@@ -50,7 +50,6 @@ class LoginForm(FlaskForm):
 class UserEditForm(FlaskForm):
     """ Form for editing user info """
 
-    # TODO: Add validation for max length for fields
     username = StringField(
         'Username',
         validators=[DataRequired(), Length(max=20)],
