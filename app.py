@@ -1,9 +1,16 @@
 import os
 
-from flask import Flask, render_template, request, flash, redirect, session, g
+from flask import (
+    Flask,
+    render_template,
+    request,
+    flash,
+    redirect,
+    session,
+    g,
+)
 from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
-
 from forms import (
     UserAddForm,
     LoginForm,
@@ -265,6 +272,11 @@ def delete_user():
 
     do_logout()
 
+    # g.user.messages_liked.clear()
+    # db.session.query(UserMessage.user_id).filter_by(user_id=g.user.id).delete()
+    # db.session.flush()
+    # print("messages_liked", g.user.messages_liked)
+
     db.session.delete(g.user)
     db.session.commit()
 
@@ -323,7 +335,7 @@ def messages_destroy(message_id):
     return redirect(f"/users/{g.user.id}")
 
 
-@app.route('/messages/liked')
+@app.route('/messages/liked', methods=["GET", "POST"])
 def messages_liked_list():
     """ Show list of liked messages for this user """
 
@@ -332,10 +344,10 @@ def messages_liked_list():
         return redirect("/")
 
     form = UserMessageLikeForm()
-    return render_template('messages/liked.html', form=form)
+    return render_template('messages/liked.html', form=form, user=g.user)
 
 
-@app.route('/messages/<int:message_id>/like')
+@app.route('/messages/<int:message_id>/like', methods=["POST"])
 def message_like(message_id):
     """ handle message like by user """
 
@@ -345,20 +357,32 @@ def message_like(message_id):
 
     form = UserMessageLikeForm()
 
+    # Check if message exists
     message = Message.query.get_or_404(message_id)
+    print("message =", message)
+
+    # Check if user message, user cannot like own message
     if message.user_id == g.user.id:
-        flash("Cannot like you own message", "danger")
+        flash("Cannot like your own message", "danger")
         return redirect('/messages/liked')
-    if message_id not in g.user.messages_liked:
+
+    print("messages liked=", g.user.messages_liked)
+    breakpoint()
+    # Check if message is not already liked
+    if message not in g.user.messages_liked:
+        print("message not in messages liked")
         if form.validate_on_submit():
             g.user.messages_liked.append(message)
             db.session.commit()
-
+            print("message added to liked=", g.user.messages_liked)
+            breakpoint()
             flash("Message liked!", "success")
             return redirect('/messages/liked')
 
-##### TODO Handle POST request for liking and unliking, pass the form to neccesary templates
-@app.route('/messages/<int:message_id>/unlike')
+    return redirect('/messages/liked')
+
+
+@app.route('/messages/<int:message_id>/unlike', methods=["POST"])
 def message_unlike(message_id):
     """ handle message unlike by user """
 
@@ -368,16 +392,18 @@ def message_unlike(message_id):
 
     form = UserMessageLikeForm()
 
+    # Check if message exists
     message = Message.query.get_or_404(message_id)
 
-    if message_id in g.user.messages_liked:
+    # Check if message is currently liked to unlike
+    if message in g.user.messages_liked:
         if form.validate_on_submit():
-            g.user.messages_liked.pop(message)
+            g.user.messages_liked.remove(message)
             db.session.commit()
-
             flash("Message unliked!", "success")
             return redirect('/messages/liked')
 
+    return redirect('/messages/liked')
 
 ##############################################################################
 # Homepage and error pages
@@ -391,6 +417,8 @@ def homepage():
     - logged in: 100 most recent messages of followed_users
     """
 
+    form = UserMessageLikeForm()
+
     if g.user:
         following_ids = [following.id for following in g.user.following]
         target_users = following_ids + [g.user.id]
@@ -402,7 +430,11 @@ def homepage():
                     .limit(100)
                     .all())
 
-        return render_template('home.html', messages=messages)
+        return render_template('home.html',
+                               messages=messages,
+                               user=g.user,
+                               form=form,
+                               )
 
     else:
         return render_template('home-anon.html')

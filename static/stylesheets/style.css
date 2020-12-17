@@ -20,6 +20,10 @@ body.error-404 {
   cursor: pointer;
 }
 
+.flash-msg {
+  z-index: 3;
+}
+
 /* ======================= Nav */
 
 .navbar {
@@ -281,6 +285,10 @@ nav + .container {
 
 #messages:not(.no-hover) .list-group-item:hover {
   background-color: #e6ecf0;
+}
+
+.like-icon {
+  z-index: 3;
 }
 
 #sidebar-username {

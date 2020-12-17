@@ -12,17 +12,19 @@
             <img src="{{ user.image_url }}" alt="user image" class="timeline-image">
           </a>
 
-          <div class="message-area col-9">
+          <div class="message-area col-9 pr-0 like-icon">
               <a href="/users/{{ user.id }}">@{{ user.username }}</a>
               <span class="text-muted">
                 {{ message.timestamp.strftime('%d %B %Y') }}
               </span>
             <p>{{ message.text }}</p>
           </div>
-          <div class="col-2 p-0">
+          <div class="col-2 p-0 like-icon">
             <form action="#">
+              {{ form.hidden_tag() }}
               <span>
-                {% if message in user.messages_liked %}
+              {% if g.user.id != message.user_id %}
+                {% if message in g.user.messages_liked %}
                       <button 
                         formaction="/messages/{{ message.id }}/unlike" 
                         formmethod="POST" 
@@ -39,6 +41,7 @@
                         <i class="far fa-star" style="color: #007bff"></i>
                     </button>
                 {% endif %}
+              {% endif %}
             </span>
           </form>
           </div>
