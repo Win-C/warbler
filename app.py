@@ -169,7 +169,9 @@ def users_show(user_id):
 
     user = User.query.get_or_404(user_id)
 
-    return render_template('users/show.html', user=user)
+    form = UserMessageLikeForm()
+
+    return render_template('users/show.html', user=user, form=form)
 
 
 @app.route('/users/<int:user_id>/following')
@@ -367,7 +369,7 @@ def message_like(message_id):
         return redirect('/messages/liked')
 
     print("messages liked=", g.user.messages_liked)
-    breakpoint()
+    # breakpoint()
     # Check if message is not already liked
     if message not in g.user.messages_liked:
         print("message not in messages liked")
@@ -375,7 +377,7 @@ def message_like(message_id):
             g.user.messages_liked.append(message)
             db.session.commit()
             print("message added to liked=", g.user.messages_liked)
-            breakpoint()
+            # breakpoint()
             flash("Message liked!", "success")
             return redirect('/messages/liked')
 
