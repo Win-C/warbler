@@ -10,8 +10,9 @@ from forms import (
     MessageForm,
     UserEditForm,
     UserLogoutForm,
+    UserMessageLikeForm,
 )
-from models import db, connect_db, User, Message
+from models import db, connect_db, User, Message, UserMessage
 
 CURR_USER_KEY = "curr_user"
 DEFAULT_IMAGE_URL = "/static/images/default-pic.png"
@@ -116,7 +117,7 @@ def login():
 
     return render_template('users/login.html', form=form)
 
-# TODO: make a WTForm with no fields and validate for CSRF protection
+
 @app.route('/logout', methods=["GET", "POST"])
 def logout():
     """Handle logout of user."""
@@ -273,11 +274,6 @@ def delete_user():
 ##############################################################################
 # Messages routes:
 
-@app.route('/messages/liked')
-def messages_liked():
-    """  """
-
-    ...
 
 @app.route('/messages/new', methods=["GET", "POST"])
 def messages_add():
@@ -305,9 +301,11 @@ def messages_add():
 @app.route('/messages/<int:message_id>', methods=["GET"])
 def messages_show(message_id):
     """Show a message."""
+    form = UserMessageLikeForm()
 
     msg = Message.query.get(message_id)
-    return render_template('messages/show.html', message=msg)
+    user = User.query.get_or_404(msg.user.id)
+    return render_template('messages/show.html', form=form, message=msg, user=user)
 
 
 @app.route('/messages/<int:message_id>/delete', methods=["POST"])
@@ -323,6 +321,62 @@ def messages_destroy(message_id):
     db.session.commit()
 
     return redirect(f"/users/{g.user.id}")
+
+
+@app.route('/messages/liked')
+def messages_liked_list():
+    """ Show list of liked messages for this user """
+
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    form = UserMessageLikeForm()
+    return render_template('messages/liked.html', form=form)
+
+
+@app.route('/messages/<int:message_id>/like')
+def message_like(message_id):
+    """ handle message like by user """
+
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    form = UserMessageLikeForm()
+
+    message = Message.query.get_or_404(message_id)
+    if message.user_id == g.user.id:
+        flash("Cannot like you own message", "danger")
+        return redirect('/messages/liked')
+    if message_id not in g.user.messages_liked:
+        if form.validate_on_submit():
+            g.user.messages_liked.append(message)
+            db.session.commit()
+
+            flash("Message liked!", "success")
+            return redirect('/messages/liked')
+
+##### TODO Handle POST request for liking and unliking, pass the form to neccesary templates
+@app.route('/messages/<int:message_id>/unlike')
+def message_unlike(message_id):
+    """ handle message unlike by user """
+
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    form = UserMessageLikeForm()
+
+    message = Message.query.get_or_404(message_id)
+
+    if message_id in g.user.messages_liked:
+        if form.validate_on_submit():
+            g.user.messages_liked.pop(message)
+            db.session.commit()
+
+            flash("Message unliked!", "success")
+            return redirect('/messages/liked')
 
 
 ##############################################################################

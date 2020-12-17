@@ -84,3 +84,7 @@ class UserEditForm(FlaskForm):
 
 class UserLogoutForm(FlaskForm):
     """ Left empty for CSRF protection and caching. """
+
+
+class UserMessageLikeForm(FlaskForm):
+    """ Left empty for CSRF protection and caching. """

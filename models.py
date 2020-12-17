@@ -44,7 +44,7 @@ class User(db.Model):
     )
 
     username = db.Column(
-        db.String(20),
+        db.String(40),
         nullable=False,
         unique=True,
     )
@@ -74,7 +74,7 @@ class User(db.Model):
     )
 
     password = db.Column(
-        db.String(20),
+        db.Text,
         nullable=False,
     )
 
@@ -92,6 +92,12 @@ class User(db.Model):
         secondary="follows",
         primaryjoin=(Follows.user_following_id == id),
         secondaryjoin=(Follows.user_being_followed_id == id)
+    )
+
+    messages_liked = db.relationship(
+        'Message',
+        secondary="users_messages",
+        backref="user_likes"
     )
 
     def __repr__(self):
@@ -177,6 +183,23 @@ class Message(db.Model):
     )
 
     user = db.relationship('User')
+
+
+class UserMessage(db.Model):
+    """ Join table for users and their liked messages """
+
+    __tablename__ = "users_messages"
+
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('users.id'),
+        primary_key=True
+    )
+    message_id = db.Column(
+        db.Integer,
+        db.ForeignKey('messages.id'),
+        primary_key=True
+    )
 
 
 def connect_db(app):
