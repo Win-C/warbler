@@ -96,7 +96,7 @@ class User(db.Model):
 
     messages_liked = db.relationship(
         'Message',
-        secondary="users_messages",
+        secondary="users_messages_liked",
         backref="users_who_liked"
     )
 
@@ -185,10 +185,10 @@ class Message(db.Model):
     user = db.relationship('User')
 
 
-class UserMessage(db.Model):
+class UserMessageLike(db.Model):
     """ Join table for users and their liked messages """
 
-    __tablename__ = "users_messages"
+    __tablename__ = "users_messages_liked"
 
     user_id = db.Column(
         db.Integer,
