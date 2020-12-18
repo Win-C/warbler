@@ -44,7 +44,7 @@
           <div class="col-2 p-0 like-icon">
             <span>
               {% if g.user.id != user.id %}
-                {% if message in g.user.messages_liked %}
+                {% if message in g.user.relationship_hash(g.user.messages_liked) %}
                   <form method="POST" action="/messages/{{ message.id }}/unlike">
                     {{ form.hidden_tag() }}
                     <button 

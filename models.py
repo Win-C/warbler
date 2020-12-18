@@ -115,6 +115,11 @@ class User(db.Model):
         found_user_list = [user for user in self.following if user == other_user]
         return len(found_user_list) == 1
 
+    def relationship_hash(self, relationship):
+        """ Takes in the relationship table and puts into a Set. """
+
+        return set(relationship)
+
     @classmethod
     def signup(cls, username, email, password, image_url):
         """Sign up user.

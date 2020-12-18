@@ -283,7 +283,7 @@ def delete_user():
 
 
 ##############################################################################
-# Messages routes:
+# Messages GENERAL routes:
 
 
 @app.route('/messages/new', methods=["GET", "POST"])
@@ -336,6 +336,10 @@ def messages_destroy(message_id):
     db.session.commit()
 
     return redirect(f"/users/{g.user.id}")
+
+
+##############################################################################
+# Messages LIKE routes:
 
 
 @app.route('/messages/liked', methods=["GET", "POST"])
