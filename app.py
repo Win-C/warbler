@@ -8,6 +8,7 @@ from flask import (
     redirect,
     session,
     g,
+    url_for,
 )
 from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
@@ -210,7 +211,8 @@ def add_follow(follow_id):
     g.user.following.append(followed_user)
     db.session.commit()
 
-    return redirect(f"/users/{g.user.id}/following")
+    redirect_url = url_for('show_following', user_id=g.user.id)
+    return redirect(redirect_url)
 
 
 @app.route('/users/stop-following/<int:follow_id>', methods=['POST'])
