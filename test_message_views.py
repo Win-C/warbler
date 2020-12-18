@@ -42,44 +42,100 @@ class MessageViewTestCase(TestCase):
 
         self.client = app.test_client()
 
-        self.testuser = User(
+        testuser = User(
             username="testuser",
             email="test@test.com",
             password="testuser",
             image_url=None
         )
-        db.session.add(self.testuser)
+        db.session.add(testuser)
         db.session.commit()
+
+        self.test_id = testuser.id
 
     def test_message_add(self):
         """Can user add a message?"""
 
         with self.client as c:
             with c.session_transaction() as sess:
-                sess[CURR_USER_KEY] = self.testuser.id
+                sess[CURR_USER_KEY] = self.test_id
 
-            resp = c.post("/messages/new", data={"text": "Hello"})
+            resp = c.post(
+                "/messages/new",
+                data={"text": "Hello"},
+                )
             # Make sure it redirects
             self.assertEqual(resp.status_code, 302)
             msg = Message.query.one()
             self.assertEqual(msg.text, "Hello")
 
+            resp = c.post(
+                "/messages/new",
+                data={"text": "Hello"},
+                follow_redirects=True,
+                )
+            html = resp.get_data(as_text=True)
+            # Make sure redirect follows through
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('id="users-show-page"', html)
+            self.assertIn("Hello", html)
+
     def test_message_show(self):
         """ Does message show? """
 
-        self.testmsg = Message(text="test_message")
-        print("users id is", self.testuser.id)
-        self.testuser.messages.append(self.testmsg)
-        db.session.commit()
-        print("users messages ", self.testuser.messages)
         with self.client as c:
             with c.session_transaction() as sess:
-                sess[CURR_USER_KEY] = self.testuser.id
-                
-            resp = c.get(f"/messages/{self.testmsg.id}")
+                sess[CURR_USER_KEY] = self.test_id
+
+            testmsg = Message(text="test_message")
+            testuser = User.query.get(self.test_id)
+            testuser.messages.append(testmsg)
+            db.session.commit()
+
+            resp = c.get(f"/messages/{testmsg.id}")
             html = resp.get_data(as_text=True)
 
             self.assertEqual(resp.status_code, 200)
             self.assertIn('test_message', html)
             self.assertNotIn('Hello', html)
             self.assertIn('id="message-show-page"', html)
+
+            msg = Message.query.get(testmsg.id)
+            self.assertEqual(msg.text, "test_message")
+
+    def test_message_destroy(self):
+        """ Does message destroy? """
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.test_id
+
+            testmsg = Message(text="test_message")
+            testuser = User.query.get(self.test_id)
+            testuser.messages.append(testmsg)
+            db.session.commit()
+
+            msg = Message.query.all()
+            self.assertEqual(len(msg), 1)
+
+            resp = c.post(f"/messages/{testmsg.id}/delete")
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 302)
+            msg = Message.query.all()
+            self.assertEqual(len(msg), 0)
+
+            testmsg2 = Message(text="test_message")
+            testuser = User.query.get(self.test_id)
+            testuser.messages.append(testmsg2)
+            db.session.commit()
+
+            resp = c.post(
+                f"/messages/{testmsg2.id}/delete",
+                follow_redirects=True,
+                )
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('id="users-show-page"', html)
+            self.assertNotIn("test_message", html)
