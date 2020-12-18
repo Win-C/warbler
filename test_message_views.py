@@ -53,6 +53,17 @@ class MessageViewTestCase(TestCase):
 
         self.test_id = testuser.id
 
+        test_message_like_user = User(
+            username="test2",
+            email="test2@test.com",
+            password="testuser",
+            image_url=None
+        )
+        db.session.add(test_message_like_user)
+        testmsg = Message(text="test_message")
+        test_message_like_user.messages.append(testmsg)
+        db.session.commit()
+
     def test_message_add(self):
         """Can user add a message?"""
 
@@ -66,7 +77,7 @@ class MessageViewTestCase(TestCase):
                 )
             # Make sure it redirects
             self.assertEqual(resp.status_code, 302)
-            msg = Message.query.one()
+            msg = Message.query.filter_by(text="Hello").first()
             self.assertEqual(msg.text, "Hello")
 
             resp = c.post(
@@ -116,14 +127,14 @@ class MessageViewTestCase(TestCase):
             db.session.commit()
 
             msg = Message.query.all()
-            self.assertEqual(len(msg), 1)
+            self.assertEqual(len(msg), 2)
 
             resp = c.post(f"/messages/{testmsg.id}/delete")
             html = resp.get_data(as_text=True)
 
             self.assertEqual(resp.status_code, 302)
             msg = Message.query.all()
-            self.assertEqual(len(msg), 0)
+            self.assertEqual(len(msg), 1)
 
             testmsg2 = Message(text="test_message")
             testuser = User.query.get(self.test_id)
@@ -139,3 +150,15 @@ class MessageViewTestCase(TestCase):
             self.assertEqual(resp.status_code, 200)
             self.assertIn('id="users-show-page"', html)
             self.assertNotIn("test_message", html)
+
+    def test_messages_liked(self):
+        """ Does messages liked show """
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.test_id
+
+            testmsg = Message(text="test_message")
+            testuser = User.query.get(self.test_id)
+            testuser.messages.append(testmsg)
+            db.session.commit()
