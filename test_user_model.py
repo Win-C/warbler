@@ -29,7 +29,7 @@ db.create_all()
 
 
 class UserModelTestCase(TestCase):
-    """Test views for messages."""
+    """Test User model."""
 
     def setUp(self):
         """Create test client, add sample data."""
@@ -56,7 +56,7 @@ class UserModelTestCase(TestCase):
         self.assertEqual(len(self.u.messages), 0)
         self.assertEqual(len(self.u.followers), 0)
         self.assertIn("test@test.com", repr(self.u))
-        
+
     def test_user_follow_methods(self):
         """ Do is_following and is_followed_by work? """   
 
@@ -91,7 +91,7 @@ class UserModelTestCase(TestCase):
         )
         db.session.commit()
         self.assertIsInstance(user_signup_test, User)
-        
+
         User.signup(
             "signup_test",
             "signup_invalid@test.com",
@@ -102,7 +102,7 @@ class UserModelTestCase(TestCase):
             db.session.commit()
         except IntegrityError:
             error = True
-            
+
         self.assertTrue(error)
 
     def test_user_authenticate(self):
@@ -121,3 +121,27 @@ class UserModelTestCase(TestCase):
 
         self.assertFalse(User.authenticate('signup_test', "Invalid password"))
         self.assertFalse(User.authenticate('Invalid_username', "HASHED_PASSWORD"))
+
+    def test_user_messages_liked(self):
+        """ Does messages_liked relationship work? """
+
+        new_user = User.signup(
+            "rel_test",
+            "rel_test@test.com",
+            "HASHED_PASSWORD",
+            None,
+        )
+        db.session.commit()
+        print("new user = ", new_user)
+        message = Message(
+            text="This is a test message.",
+        )
+        print("new message =", message)
+        self.u.messages.append(message)
+        db.session.flush()
+        new_user.messages_liked.append(message)
+        db.session.commit()
+        print("messages liked =", new_user.messages_liked)
+
+        self.assertIn(message, new_user.messages_liked)
+        self.assertIn(new_user, message.users_who_liked)

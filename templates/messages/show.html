@@ -13,7 +13,6 @@
           <div class="message-area col-9 pr-0">
             <div class="message-heading">
               <form method="POST">
-                {{ form.hidden_tag() }}
                 <a href="/users/{{ message.user.id }}">@{{ message.user.username }}</a>
                 {% if g.user %}
                   {% if g.user.id == message.user.id %}
