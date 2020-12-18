@@ -61,12 +61,10 @@ class MessageViewTestCase(TestCase):
                 sess[CURR_USER_KEY] = self.testuser.id
 
             # Now, that session setting is saved, so we can have
-            # the rest of ours test
+            # the rest of our tests
 
             resp = c.post("/messages/new", data={"text": "Hello"})
-
             # Make sure it redirects
             self.assertEqual(resp.status_code, 302)
-
             msg = Message.query.one()
             self.assertEqual(msg.text, "Hello")
