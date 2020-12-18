@@ -4,7 +4,6 @@
 #
 #    FLASK_ENV=production python -m unittest test_message_views.py
 
-
 import os
 from unittest import TestCase
 
@@ -43,28 +42,44 @@ class MessageViewTestCase(TestCase):
 
         self.client = app.test_client()
 
-        self.testuser = User.signup(username="testuser",
-                                    email="test@test.com",
-                                    password="testuser",
-                                    image_url=None)
-
+        self.testuser = User(
+            username="testuser",
+            email="test@test.com",
+            password="testuser",
+            image_url=None
+        )
+        db.session.add(self.testuser)
         db.session.commit()
 
-    def test_add_message(self):
-        """Can use add a message?"""
-
-        # Since we need to change the session to mimic logging in,
-        # we need to use the changing-session trick:
+    def test_message_add(self):
+        """Can user add a message?"""
 
         with self.client as c:
             with c.session_transaction() as sess:
                 sess[CURR_USER_KEY] = self.testuser.id
-
-            # Now, that session setting is saved, so we can have
-            # the rest of our tests
 
             resp = c.post("/messages/new", data={"text": "Hello"})
             # Make sure it redirects
             self.assertEqual(resp.status_code, 302)
             msg = Message.query.one()
             self.assertEqual(msg.text, "Hello")
+
+    def test_message_show(self):
+        """ Does message show? """
+
+        self.testmsg = Message(text="test_message")
+        print("users id is", self.testuser.id)
+        self.testuser.messages.append(self.testmsg)
+        db.session.commit()
+        print("users messages ", self.testuser.messages)
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.testuser.id
+                
+            resp = c.get(f"/messages/{self.testmsg.id}")
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('test_message', html)
+            self.assertNotIn('Hello', html)
+            self.assertIn('id="message-show-page"', html)

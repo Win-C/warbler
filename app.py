@@ -376,8 +376,6 @@ def message_like(message_id):
             flash("Message liked!", "success")
             return redirect('/messages/liked')
 
-    return redirect('/messages/liked')
-
 
 @app.route('/messages/<int:message_id>/unlike', methods=["POST"])
 def message_unlike(message_id):
@@ -400,7 +398,6 @@ def message_unlike(message_id):
             flash("Message unliked!", "success")
             return redirect('/messages/liked')
 
-    return redirect('/messages/liked')
 
 ##############################################################################
 # Homepage and error pages
