@@ -60,9 +60,13 @@ class MessageViewTestCase(TestCase):
             image_url=None
         )
         db.session.add(test_message_like_user)
-        testmsg = Message(text="test_message")
+        testmsg = Message(text="test_liked_message")
         test_message_like_user.messages.append(testmsg)
         db.session.commit()
+        testuser.messages_liked.append(testmsg)
+        db.session.commit()
+
+        self.test_user_likes_id = test_message_like_user.id
 
     def test_message_add(self):
         """Can user add a message?"""
@@ -158,7 +162,40 @@ class MessageViewTestCase(TestCase):
             with c.session_transaction() as sess:
                 sess[CURR_USER_KEY] = self.test_id
 
-            testmsg = Message(text="test_message")
-            testuser = User.query.get(self.test_id)
-            testuser.messages.append(testmsg)
+            resp = c.get('/messages/liked')
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('id="liked-messages-page"', html)
+            self.assertIn('test_liked_message', html)
+            self.assertNotIn('test_message', html)
+
+    def test_message_like(self):
+        """ Does message like work? """
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.test_id
+
+            testmsg = Message(text="new_message_liked")
+            test_user2 = User.query.get(self.test_user_likes_id)
+            test_user2.messages.append(testmsg)
             db.session.commit()
+
+            resp = c.post(f"/messages/{testmsg.id}/like")
+
+            self.assertEqual(resp.status_code, 302)
+            curr_user = User.query.get(self.test_id)
+            self.assertIn(testmsg, curr_user.messages_liked)
+
+            resp = c.post(
+                f"/messages/{testmsg.id}/like",
+                follow_redirects=True
+                )
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('id="liked-messages-page"', html)
+            self.assertIn('new_message_liked', html)
+            self.assertIn('test_liked_message', html)
+            self.assertNotIn('test_message', html)

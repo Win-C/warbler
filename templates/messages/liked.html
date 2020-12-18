@@ -3,7 +3,7 @@
   <div class="col-sm-6">
     <ul class="list-group" id="messages">
 
-      <h3>Here are your liked messages: </h3>
+      <h3 id="liked-messages-page">Here are your liked messages: </h3>
           {% for message in user.messages_liked %}
               <li class="list-group-item">
                 <a href="{{ url_for('users_show', user_id=message.user.id) }}">

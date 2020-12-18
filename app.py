@@ -369,12 +369,14 @@ def message_like(message_id):
         return redirect('/messages/liked')
 
     # Check if message is not already liked
-    if message not in g.user.messages_liked:
-        if form.validate_on_submit():
-            g.user.messages_liked.append(message)
-            db.session.commit()
-            flash("Message liked!", "success")
-            return redirect('/messages/liked')
+    if message in g.user.messages_liked:
+        flash('Message already liked', "danger")
+        return redirect('/messages/liked')
+    if form.validate_on_submit():
+        g.user.messages_liked.append(message)
+        db.session.commit()
+        flash("Message liked!", "success")
+        return redirect('/messages/liked')
 
 
 @app.route('/messages/<int:message_id>/unlike', methods=["POST"])
@@ -391,12 +393,14 @@ def message_unlike(message_id):
     message = Message.query.get_or_404(message_id)
 
     # Check if message is currently liked to unlike
-    if message in g.user.messages_liked:
-        if form.validate_on_submit():
-            g.user.messages_liked.remove(message)
-            db.session.commit()
-            flash("Message unliked!", "success")
-            return redirect('/messages/liked')
+    if message not in g.user.messages_liked:
+        flash('Message already unliked', "danger")
+        return redirect('/messages/liked')
+    if form.validate_on_submit():
+        g.user.messages_liked.remove(message)
+        db.session.commit()
+        flash("Message unliked!", "success")
+        return redirect('/messages/liked')
 
 
 ##############################################################################
