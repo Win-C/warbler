@@ -96,8 +96,7 @@ class User(db.Model):
 
     messages_liked = db.relationship(
         'Message',
-        secondary="users_messages_liked",
-        backref="users_who_liked"
+        secondary="likes",
     )
 
     def __repr__(self):
@@ -106,13 +105,17 @@ class User(db.Model):
     def is_followed_by(self, other_user):
         """Is this user followed by `other_user`?"""
 
-        found_user_list = [user for user in self.followers if user == other_user]
+        found_user_list = [
+            user for user in self.followers if user == other_user
+        ]
         return len(found_user_list) == 1
 
     def is_following(self, other_user):
         """Is this user following `other_user`?"""
 
-        found_user_list = [user for user in self.following if user == other_user]
+        found_user_list = [
+            user for user in self.following if user == other_user
+        ]
         return len(found_user_list) == 1
 
     def relationship_hash(self, relationship):
@@ -190,23 +193,6 @@ class Message(db.Model):
     user = db.relationship('User')
 
 
-class UserMessageLike(db.Model):
-    """ Join table for users and their liked messages """
-
-    __tablename__ = "users_messages_liked"
-
-    user_id = db.Column(
-        db.Integer,
-        db.ForeignKey('users.id', ondelete='CASCADE'),
-        primary_key=True
-    )
-    message_id = db.Column(
-        db.Integer,
-        db.ForeignKey('messages.id', ondelete='CASCADE'),
-        primary_key=True
-    )
-
-
 def connect_db(app):
     """Connect this database to provided Flask app.
 
@@ -215,3 +201,20 @@ def connect_db(app):
 
     db.app = app
     db.init_app(app)
+
+
+class Like(db.Model):
+    """ Join table for users and a liked message. """
+
+    __tablename__ = "likes"
+
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('users.id', ondelete='CASCADE'),
+        primary_key=True,
+    )
+    message_id = db.Column(
+        db.Integer,
+        db.ForeignKey('messages.id', ondelete='CASCADE'),
+        primary_key=True,
+    )

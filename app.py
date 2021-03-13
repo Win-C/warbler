@@ -36,8 +36,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = (
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = False
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', "it's a secret")
-# app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = True
-# toolbar = DebugToolbarExtension(app)
+app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = True
+toolbar = DebugToolbarExtension(app)
 
 connect_db(app)
 
@@ -81,6 +81,8 @@ def signup():
     If the there already is a user with that username: flash message
     and re-present form.
     """
+    if CURR_USER_KEY in session:
+        del session[CURR_USER_KEY]
 
     form = UserAddForm()
 
@@ -231,35 +233,34 @@ def stop_following(follow_id):
 
 
 @app.route('/users/profile', methods=["GET", "POST"])
-def profile():
+def edit_profile():
     """Update profile for current user."""
 
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
-    curr_username = g.user.username
-
+    user = g.user
     form = UserEditForm(obj=g.user)
 
     if form.validate_on_submit():
-        if User.authenticate(curr_username, form.password.data):
-            g.user.username = form.username.data
-            g.user.email = form.email.data
-            g.user.image_url = (
+        if User.authenticate(user.username, form.password.data):
+            user.username = form.username.data
+            user.email = form.email.data
+            user.image_url = (
                 form.image_url.data or
                 DEFAULT_IMAGE_URL
             )
-            g.user.header_image_url = (
+            user.header_image_url = (
                 form.header_image_url.data or
                 DEFAULT_HEADER_IMAGE_URL
             )
-            g.user.bio = form.bio.data
-            g.user.location = form.location.data
+            user.bio = form.bio.data
+            user.location = form.location.data
             db.session.commit()
 
             flash("User has been edited!", "success")
-            return redirect(f"/users/{g.user.id}")
+            return redirect(f"/users/{user.id}")
         else:
             flash("Incorrect password", "danger")
             return redirect("/")
