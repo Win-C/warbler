@@ -19,29 +19,25 @@ Database:
     - One user may have many followers and one user may be following many users (many-to-many)
 
 ## Current features
-
-- General app functions:
-    - Homepage of messages from followers
-    - Ability to write messages up to 140 characters long
-    - Ability to like (star) and unlike (unstar) messages
-    - Ability to follow and unfollow other users
-    - Ability to search for users
-    - Ability to edit own profile
+- Homepage for logged in user consists of messages from current followers, showing most recent
+- Logged in user can write messages up to 140 characters long
+- Logged in user can like (star) and unlike (unstar) other user's messages
+- Logged in user can follow and unfollow other users
+- Logged in user can search for users
+- Logged in user can edit own profile
 
 ## Upcoming features
-
-- Additional features under development:
-    - AJAX for liking / unliking messages without needing a full page refresh
-    - DRY up authorization
-    - DRY up URLs
-    - Optimize queries
-    - Make change password form
-    - Allow "private" accounts
-    - Add admin users
-    - User blocking
-    - Direct messages
-    - Custom 404 page
-    - DRY up templates
+- AJAX for liking / unliking messages without needing a full page refresh
+- DRY up authorization
+- DRY up URLs
+- Optimize queries
+- Make change password form
+- Allow "private" accounts
+- Add admin users
+- User blocking
+- Direct messages
+- Custom 404 page
+- DRY up templates
 
 ## Tech stack
 - PostgreSQL for database
