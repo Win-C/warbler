@@ -1,12 +1,15 @@
 # Warbler
 
-Warbler is a miniature clone of the popular social messaging platform, Twitter.Warbler lets you send out messages (or "warbles") that are max 140 characters long. Users can follow others and like other users' messages.  
+Warbler is a miniature clone of the popular social messaging platform, Twitter. Warbler lets you send out messages (or "warbles") that are max 140 characters long. Users can follow others and like other users' messages.  
+
+Check out the deployed app <a href="https://winnie-chou-warbler.herokuapp.com/">here</a>.
 
 ## Screenshots
 
-TBU with application screenshots
+TODO: TBU with application screenshots
 
 Database:
+TODO: insert diagram
 
 - Note: The follows and likes tables are both join tables and have two foreign keys. 
 - Key relationships:
@@ -50,6 +53,7 @@ Database:
 - bcrypt
 - email-validator
 - Flask
+- gunicorn
 - Jinja2
 - psycopg2-binary
 - SQLALchemy
@@ -89,12 +93,46 @@ Tests have been created for both the models and routes (view-functions). There a
 To run a file containing unittests, you can run the following command:
 
 ```console
-FLASK_ENV=production python -m unittest <name-of-python-file>
+FLASK_ENV=production python3 -m unittest <name-of-python-file>
 ```
 We set FLASK_ENV for this command, so it doesn’t use debug mode, and therefore won’t use the Debug Toolbar during our tests. If you are having an error running tests (comment out the line in your app.py that uses the Debug Toolbar).
 
 ## Deploying
-TBU with notes about how to deploy this on a live system
+We used gunicorn for our production ready server and Heroku for deployment. 
+
+Created Procfile to tell Heroku what command to run to start the server:
+```console
+echo "web: gunicorn app:app" > Procfile
+```
+
+Added a runtime.txt file to capture version of Python being used:
+```console
+echo "python-3.7.2" > runtime.txt
+```
+
+Created our Heroku app:
+```console
+heroku login
+heroku create_NAME_OF_APP
+git remote -v
+git push heroku master
+heroku open
+```
+
+Set our environment variables to production variables. 
+
+Added and connected a Postgres database using the hobby-dev free tier:
+```console
+heroku addons:create heroku-postgresql:hobby-dev
+heroku config
+heroku pg:psql
+```
+
+Now you can run a SQL file on Heroku or run commands on your production server. We seeded our database:
+```console
+heroku run python3 seed.py
+```
+
 
 ## Authors
 - Winnie Chou
