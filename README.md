@@ -59,6 +59,7 @@ Database:
 - psycopg2-binary
 - SQLALchemy
 - WTForms
+
 Note: faker library was used to generate users and messages for seeding
 
 **Frontend dependencies** include:
