@@ -1,4 +1,4 @@
-# Warbler
+# Warbler <img src="/static/images/warbler-logo.png" alt="logo" width="50" height="50"> 
 
 Warbler is a miniature clone of the popular social messaging platform, Twitter. Warbler lets you send out messages (or "warbles") that are max 140 characters long. Users can follow others and like other users' messages.  
 
@@ -9,7 +9,8 @@ Check out the deployed app <a href="https://winnie-chou-warbler.herokuapp.com/">
 TODO: TBU with application screenshots
 
 Database:
-TODO: insert diagram
+
+<img src="/static/images/database-er-diagram.jpg" width="1000" height="400">
 
 - Note: The follows and likes tables are both join tables and have two foreign keys. 
 - Key relationships:
@@ -60,7 +61,8 @@ TODO: insert diagram
 - WTForms
 Note: faker library was used to generate users and messages for seeding
 
-**Setup**
+**Development Setup**
+
 Create the Python virtual environment:
 ```console
 python3 -m venv venv
@@ -132,7 +134,6 @@ Now you can run a SQL file on Heroku or run commands on your production server. 
 ```console
 heroku run python3 seed.py
 ```
-
 
 ## Authors
 - Winnie Chou
