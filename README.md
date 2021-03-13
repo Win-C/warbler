@@ -27,7 +27,3 @@ You can view a deployed version [here](https://http://lucas-pagac-warbler.heroku
   * PostgreSQL
   * SQLAlchemy
   * Jinja
-
-## Contributors
-
-My partner for this project was [Winnie Chou](https://github.com/Win-C). 
