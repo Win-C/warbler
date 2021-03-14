@@ -9,8 +9,8 @@ Check out the deployed app <a href="https://winnie-chou-warbler.herokuapp.com/">
 Below are screenshots of the deployed app:
 
 <span>
-    <img src="/static/images/warbler-landing-page.png" width="400" height="400" style="border:0px;margin:0px;float:left;width:200px;">
-    <img src="/static/images/warbler-signup-form.png" width="400" height="400" style="border:0px;margin:0px;clear:both;width:200px;">
+    <img src="/static/images/warbler-landing-page.png" width="350" height="350" style="border:1px;margin:0px;float:left;width:200px;">
+    <img src="/static/images/warbler-signup-form.png" width="350" height="350" style="border:1px;margin:0px;clear:both;width:200px;">
 </span>
 <img src="/static/images/warbler-user-profile.png" width="750" height="400">
 
