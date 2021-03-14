@@ -8,11 +8,11 @@ Check out the deployed app <a href="https://winnie-chou-warbler.herokuapp.com/">
 
 TODO: TBU with application screenshots
 
-Database:
+**Database**
 
 <img src="/static/images/database-er-diagram.jpg" width="1000" height="250">
 
-- Note: The follows and likes tables are both join tables and have two foreign keys. 
+- Note: The follows and likes tables are both join tables and have two foreign keys as each table's respective primary key. 
 - Key relationships:
     - One user may have many messages (one-to-many)
     - One user may like many messages (one-to-many)
@@ -89,6 +89,8 @@ Start the server:
 
 ## Testing
 Tests have been created for both the models and routes (view-functions). There are four test files in total: one set of tests for users and one set of tests for messages. 
+
+TODO: Add coverage report
 
 To run a file containing unittests, you can run the following command:
 
