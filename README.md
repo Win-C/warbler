@@ -6,9 +6,12 @@ Check out the deployed app <a href="https://winnie-chou-warbler.herokuapp.com/">
 
 ## Screenshots
 
-TODO: TBU with application screenshots
+Below are screenshots of the deployed app:
+<img src="/static/images/warbler-landing-page.png" width="500" height="250">
+<img src="/static/images/warbler-signup-form.png" width="500" height="250">
+<img src="/static/images/warbler-user-profile.png" width="1000" height="250">
 
-**Database**
+**Database Design**
 
 <img src="/static/images/database-er-diagram.jpg" width="1000" height="250">
 
@@ -89,8 +92,6 @@ Start the server:
 
 ## Testing
 Tests have been created for both the models and routes (view-functions). There are four test files in total: one set of tests for users and one set of tests for messages. 
-
-TODO: Add coverage report
 
 To run a file containing unittests, you can run the following command:
 
