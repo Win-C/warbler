@@ -14,9 +14,9 @@ Below are screenshots of the deployed app:
 </span>
 <img src="/static/images/warbler-user-profile.png" width="750" height="400">
 
-**Database Design**
+**Database Entity Relationships**
 
-<img src="/static/images/database-er-diagram.jpg" width="1000" height="250">
+<img src="/static/images/database-er-diagram.png" width="1000" height="250">
 
 - Note: The follows and likes tables are both join tables and have two foreign keys as each table's respective primary key. 
 - Key relationships:
@@ -75,11 +75,11 @@ Note: frontend dependencies use scripts, see base.html
 ## Installation
 **App Development Setup**
 
-Create the Python virtual environment:
+Create the Python virtual environment and install requirements
 ```console
 python3 -m venv venv
 source venv/bin/activate
-(venv) $ pip3 install -r requirements.txt
+(venv) pip3 install -r requirements.txt
 ```
 
 Set up the database:
