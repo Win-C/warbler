@@ -125,7 +125,7 @@ git push heroku master
 heroku open
 ```
 
-Reminder to configure and set our environment variables to production variables. 
+Reminder to configure and set your environment variables to production variables. 
 
 Add and connect a Postgres database (we used the hobby-dev free tier):
 ```console
@@ -135,7 +135,8 @@ heroku pg:psql
 ```
 
 Now you can run a SQL file on Heroku or run commands on your production server.
-We seeded our database:
+
+And if you want, you can seed the database:
 ```console
 heroku run python3 seed.py
 ```
