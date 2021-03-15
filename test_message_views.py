@@ -44,45 +44,52 @@ class MessageViewTestCase(TestCase):
 
         self.client = app.test_client()
 
-        testuser = User(
-            username="testuser",
+        self.u1 = User(
+            username="testuser1",
             email="test@test.com",
             password="testuser",
             image_url=None
         )
-        db.session.add(testuser)
-        db.session.commit()
+        db.session.add(self.u1)
 
-        self.test_id = testuser.id
-
-        test_message_like_user = User(
-            username="test2",
+        self.u2 = User(
+            username="testuser2",
             email="test2@test.com",
             password="testuser",
             image_url=None
         )
-        db.session.add(test_message_like_user)
-        testmsg = Message(text="test_liked_message")
-        test_message_like_user.messages.append(testmsg)
-        db.session.commit()
-        testuser.messages_liked.append(testmsg)
+        db.session.add(self.u2)
+
+        self.testmsg = Message(text="test_liked_message")
+        self.u2.messages.append(self.testmsg)
+        self.u1.messages_liked.append(self.testmsg)
+
         db.session.commit()
 
-        self.test_user_likes_id = test_message_like_user.id
+        self.u1_id = self.u1.id
+        self.u2_id = self.u2.id
 
     def test_message_add(self):
-        """Can user add a message?"""
+        """ With session, can currently-logged-in user add a message? """
+
+        # Since we need to change the session to mimic logging in,
+        # we need to use the changing-session trick:
 
         with self.client as c:
             with c.session_transaction() as sess:
-                sess[CURR_USER_KEY] = self.test_id
+                sess[CURR_USER_KEY] = self.u1_id
+
+            # Now, that session setting is saved, so we can have
+            # the rest of ours test
 
             resp = c.post(
                 "/messages/new",
                 data={"text": "Hello"},
                 )
+
             # Make sure it redirects
             self.assertEqual(resp.status_code, 302)
+
             msg = Message.query.filter_by(text="Hello").first()
             self.assertEqual(msg.text, "Hello")
 
@@ -92,113 +99,188 @@ class MessageViewTestCase(TestCase):
                 follow_redirects=True,
                 )
             html = resp.get_data(as_text=True)
+
             # Make sure redirect follows through
             self.assertEqual(resp.status_code, 200)
             self.assertIn('id="users-show-page"', html)
             self.assertIn("Hello", html)
 
-    def test_message_show(self):
-        """ Does message show? """
+    def test_message_add_no_session(self):
+        """ Without session, currently-logged-in user cannot add a message? """
+
+        with self.client as c:
+            resp = c.post(
+                "messages/new",
+                data={"test": "Hello"},
+                follow_redirects=True,
+            )
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("Access unauthorized", str(resp.data))
+
+    def test_message_add_invalid_user(self):
+        """ Invalid user cannot add a message? """
 
         with self.client as c:
             with c.session_transaction() as sess:
-                sess[CURR_USER_KEY] = self.test_id
+                sess[CURR_USER_KEY] = 92347984536  # user does not exist
 
-            testmsg = Message(text="test_message")
-            testuser = User.query.get(self.test_id)
-            testuser.messages.append(testmsg)
+            resp = c.post(
+                "messages/new",
+                data={"test": "Hello"},
+                follow_redirects=True,
+            )
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("Access unauthorized", str(resp.data))
+
+    def test_message_show(self):
+        """ With session, are the currently-logged-in user's messages shown? """
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.u1_id
+
+            test_msg = Message(
+                text="test_message",
+                user_id=self.u1_id,
+            )
+
+            db.session.add(test_msg)
             db.session.commit()
 
-            resp = c.get(f"/messages/{testmsg.id}")
+            resp = c.get(f"/messages/{test_msg.id}")
             html = resp.get_data(as_text=True)
 
             self.assertEqual(resp.status_code, 200)
-            self.assertIn('test_message', html)
+            self.assertIn(test_msg.text, str(resp.data))
             self.assertNotIn('Hello', html)
             self.assertIn('id="message-show-page"', html)
 
-            msg = Message.query.get(testmsg.id)
+            msg = Message.query.get(test_msg.id)
             self.assertEqual(msg.text, "test_message")
 
-    def test_message_destroy(self):
-        """ Does message destroy? """
+    def test_message_show_invalid(self):
+        """ 404 error if trying to access a message that does not exist? """
 
         with self.client as c:
             with c.session_transaction() as sess:
-                sess[CURR_USER_KEY] = self.test_id
+                sess[CURR_USER_KEY] = self.u1_id
 
-            testmsg = Message(text="test_message")
-            testuser = User.query.get(self.test_id)
-            testuser.messages.append(testmsg)
+            resp = c.get("/messages/93185742058")
+
+            self.assertEqual(resp.status_code, 404)
+
+    def test_message_destroy(self):
+        """ With session, can currently-logged-in user delete a message? """
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.u1_id
+
+            test_msg = Message(
+                text="test_message",
+                user_id=self.u1_id,
+            )
+            db.session.add(test_msg)
             db.session.commit()
 
             msg = Message.query.all()
             self.assertEqual(len(msg), 2)
 
-            resp = c.post(f"/messages/{testmsg.id}/delete")
+            # Delete added message
+            resp = c.post(f"/messages/{test_msg.id}/delete")
             html = resp.get_data(as_text=True)
 
             self.assertEqual(resp.status_code, 302)
             msg = Message.query.all()
             self.assertEqual(len(msg), 1)
 
-            testmsg2 = Message(text="test_message")
-            testuser = User.query.get(self.test_id)
-            testuser.messages.append(testmsg2)
+            # Add a second message
+            test_msg2 = Message(
+                text="test_message",
+                user_id=self.u1_id,
+            )
+            db.session.add(test_msg2)
             db.session.commit()
 
+            # Test redirect follows through
             resp = c.post(
-                f"/messages/{testmsg2.id}/delete",
+                f"/messages/{test_msg2.id}/delete",
                 follow_redirects=True,
-                )
+            )
             html = resp.get_data(as_text=True)
 
             self.assertEqual(resp.status_code, 200)
             self.assertIn('id="users-show-page"', html)
             self.assertNotIn("test_message", html)
 
+    def test_message_destroy_no_session(self):
+        """ Without session, cannot delete a message? """
+
+        test_msg = Message(
+            id=1234,
+            text="test_message",
+            user_id=self.u1.id,
+        )
+        db.session.add(test_msg)
+        db.session.commit()
+
+        with self.client as c:
+            resp = c.post(
+                "/messages/1234/delete",
+                follow_redirects=True,
+            )
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("Access unauthorized", str(resp.data))
+
+            test_msg = Message.query.get(1234)
+            self.assertIsNotNone(test_msg)
+
+    def test_message_destroy_unauthorized(self):
+        """ Unauthorized user (user does not own message) cannot delete? """
+
+        unauth_user = User.signup(
+            username="test-unauthorized",
+            email="test-unauth@test.com",
+            password="testuser",
+            image_url=None,
+        )
+
+        # message belongs to testuser1
+        test_msg = Message(
+            id=1234,
+            text="test_message",
+            user_id=self.u1.id,
+        )
+        db.session.add_all([unauth_user, test_msg])
+        db.session.commit()
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = unauth_user.id
+
+            resp = c.post(
+                "/messages/1234/delete",
+                follow_redirects=True,
+            )
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("Access unauthorized", str(resp.data))
+
+            msg = Message.query.get(1234)
+            self.assertIsNotNone(msg)
+
     def test_messages_liked_list(self):
         """ Does list of messages liked get displayed? """
 
         with self.client as c:
             with c.session_transaction() as sess:
-                sess[CURR_USER_KEY] = self.test_id
+                sess[CURR_USER_KEY] = self.u1_id
 
-            resp = c.get(f"/users/{self.test_id}/likes")
+            resp = c.get(f"/users/{self.u1_id}/likes")
             html = resp.get_data(as_text=True)
 
             self.assertEqual(resp.status_code, 200)
             self.assertIn('id="liked-messages-page"', html)
             self.assertIn('test_liked_message', html)
             self.assertNotIn('test_message', html)
-
-    # def test_message_like(self):
-    #     """ Does liking a message work? """
-
-    #     with self.client as c:
-    #         with c.session_transaction() as sess:
-    #             sess[CURR_USER_KEY] = self.test_id
-
-    #         testmsg = Message(text="new_message_liked")
-    #         test_user2 = User.query.get(self.test_user_likes_id)
-    #         test_user2.messages.append(testmsg)
-    #         db.session.commit()
-
-    #         resp = c.post(f"/messages/{testmsg.id}/like")
-
-    #         self.assertEqual(resp.status_code, 302)
-    #         curr_user = User.query.get(self.test_id)
-    #         self.assertIn(testmsg, curr_user.messages_liked)
-
-    #         resp = c.post(
-    #             f"/messages/{testmsg.id}/like",
-    #             follow_redirects=True
-    #             )
-    #         html = resp.get_data(as_text=True)
-
-    #         self.assertEqual(resp.status_code, 200)
-    #         self.assertIn('id="liked-messages-page"', html)
-    #         self.assertIn('new_message_liked', html)
-    #         self.assertIn('test_liked_message', html)
-    #         self.assertNotIn('test_message', html)
-
