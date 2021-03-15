@@ -68,6 +68,14 @@ class UserViewTestCase(TestCase):
 
         self.test_user_likes_id = test_message_like_user.id
 
+    def tearDown(self):
+        resp = super().tearDown()
+        db.session.rollback()
+        return resp
+
+    def test_users_search(self):
+        """ Does searching for users work? """
+
     def test_users_list(self):
         """ Display list of users works? """
 
