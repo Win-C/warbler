@@ -50,4 +50,4 @@ class MessageModelTestCase(TestCase):
 
         self.assertIn("This is a test message.", self.m.text)
         self.assertEqual(self.m.user_id, self.u.id)
-        self.assertEqual(self.m.user.id, self.u.id)
+        self.assertEqual(len(self.u.messages), 1)
