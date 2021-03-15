@@ -33,7 +33,7 @@
                 </div>
                 <div class="col-2 p-0 like-icon">
                   <span>
-                    <form method="POST" action="/messages/{{ message.id }}/unlike">
+                    <form method="POST" action="/messages/{{ message.id }}/like">
                       {{ form.hidden_tag() }}
                       <button 
                       type="submit" 

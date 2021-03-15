@@ -155,8 +155,8 @@ class MessageViewTestCase(TestCase):
             self.assertIn('id="users-show-page"', html)
             self.assertNotIn("test_message", html)
 
-    def test_messages_liked(self):
-        """ Does messages liked show """
+    def test_messages_liked_list(self):
+        """ Does list of messages liked get displayed? """
 
         with self.client as c:
             with c.session_transaction() as sess:
@@ -171,7 +171,7 @@ class MessageViewTestCase(TestCase):
             self.assertNotIn('test_message', html)
 
     def test_message_like(self):
-        """ Does message like work? """
+        """ Does liking a message work? """
 
         with self.client as c:
             with c.session_transaction() as sess:
@@ -199,3 +199,10 @@ class MessageViewTestCase(TestCase):
             self.assertIn('new_message_liked', html)
             self.assertIn('test_liked_message', html)
             self.assertNotIn('test_message', html)
+
+    def test_message_unlike(self):
+        """ Does unliking a message work? """
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.test_id

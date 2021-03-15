@@ -150,7 +150,7 @@ def logout():
 # General user routes:
 
 @app.route('/users')
-def list_users():
+def users_list():
     """Page with listing of users.
 
     Can take a 'q' param in querystring to search by that username.
@@ -178,7 +178,7 @@ def users_show(user_id):
 
 
 @app.route('/users/<int:user_id>/following')
-def show_following(user_id):
+def users_following(user_id):
     """Show list of people this user is following."""
 
     if not g.user:
@@ -202,7 +202,7 @@ def users_followers(user_id):
 
 
 @app.route('/users/follow/<int:follow_id>', methods=['POST'])
-def add_follow(follow_id):
+def users_add_follow(follow_id):
     """Add a follow for the currently-logged-in user."""
 
     if not g.user:
@@ -218,7 +218,7 @@ def add_follow(follow_id):
 
 
 @app.route('/users/stop-following/<int:follow_id>', methods=['POST'])
-def stop_following(follow_id):
+def users_stop_following(follow_id):
     """Have currently-logged-in-user stop following this user."""
 
     if not g.user:
@@ -233,7 +233,7 @@ def stop_following(follow_id):
 
 
 @app.route('/users/profile', methods=["GET", "POST"])
-def edit_profile():
+def users_edit_profile():
     """Update profile for current user."""
 
     if not g.user:
@@ -263,12 +263,12 @@ def edit_profile():
             return redirect(f"/users/{user.id}")
         else:
             flash("Incorrect password", "danger")
-            return redirect("/")
+
     return render_template('users/edit.html', form=form)
 
 
 @app.route('/users/delete', methods=["POST"])
-def delete_user():
+def users_delete():
     """Delete user."""
 
     if not g.user:
@@ -301,6 +301,7 @@ def messages_add():
         return redirect("/")
 
     form = MessageForm()
+
     if form.validate_on_submit():
         msg = Message(text=form.text.data)
         g.user.messages.append(msg)
@@ -318,6 +319,7 @@ def messages_show(message_id):
 
     msg = Message.query.get(message_id)
     user = User.query.get_or_404(msg.user.id)
+
     return render_template(
         'messages/show.html',
         form=form,
@@ -335,6 +337,10 @@ def messages_destroy(message_id):
         return redirect("/")
 
     msg = Message.query.get(message_id)
+    if msg.user_id != g.user.id:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
     db.session.delete(msg)
     db.session.commit()
 
@@ -345,8 +351,8 @@ def messages_destroy(message_id):
 # Messages LIKE routes:
 
 
-@app.route('/messages/liked', methods=["GET", "POST"])
-def messages_liked_list():
+@app.route('/users/<int:user_id>/likes', methods=["GET", "POST"])
+def users_likes(user_id):
     """ Show list of liked messages for this user """
 
     if not g.user:
@@ -354,18 +360,17 @@ def messages_liked_list():
         return redirect("/")
 
     form = UserMessageLikeForm()
-    return render_template('messages/liked.html', form=form, user=g.user)
+
+    return render_template('users/likes.html', form=form, user=g.user)
 
 
 @app.route('/messages/<int:message_id>/like', methods=["POST"])
-def message_like(message_id):
-    """ handle message like by user """
+def messages_add_like(message_id):
+    """ Toggle a liked message for the currently-logged-in user. """
 
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
-
-    form = UserMessageLikeForm()
 
     # Check if message exists
     message = Message.query.get_or_404(message_id)
@@ -373,41 +378,16 @@ def message_like(message_id):
     # Check if user message, user cannot like own message
     if message.user_id == g.user.id:
         flash("Cannot like your own message", "danger")
-        return redirect('/messages/liked')
+        return redirect(f"/users/{g.user.id}/likes")
 
-    # Check if message is not already liked
+    # Check if message is already liked or not for toggle
     if message in g.user.messages_liked:
-        flash('Message already liked', "danger")
-        return redirect('/messages/liked')
-    if form.validate_on_submit():
-        g.user.messages_liked.append(message)
-        db.session.commit()
-        flash("Message liked!", "success")
-        return redirect('/messages/liked')
-
-
-@app.route('/messages/<int:message_id>/unlike', methods=["POST"])
-def message_unlike(message_id):
-    """ handle message unlike by user """
-
-    if not g.user:
-        flash("Access unauthorized.", "danger")
-        return redirect("/")
-
-    form = UserMessageLikeForm()
-
-    # Check if message exists
-    message = Message.query.get_or_404(message_id)
-
-    # Check if message is currently liked to unlike
-    if message not in g.user.messages_liked:
-        flash('Message already unliked', "danger")
-        return redirect('/messages/liked')
-    if form.validate_on_submit():
         g.user.messages_liked.remove(message)
-        db.session.commit()
-        flash("Message unliked!", "success")
-        return redirect('/messages/liked')
+    else:
+        g.user.messages_liked.append(message)
+
+    db.session.commit()
+    return redirect(f"/users/{g.user.id}/likes")
 
 
 ##############################################################################
