@@ -23,9 +23,10 @@ class MessageModelTestCase(TestCase):
         Follows.query.delete()
 
         self.u = User(
-            email="test@test.com",
             username="testuser",
-            password="HASHED_PASSWORD"
+            email="test@test.com",
+            password="HASHED_PASSWORD",
+            image_url=None,
         )
 
         db.session.add(self.u)
@@ -38,6 +39,11 @@ class MessageModelTestCase(TestCase):
         db.session.commit()
 
         self.client = app.test_client()
+
+    def tearDown(self):
+        res = super().tearDown()
+        db.session.rollback()
+        return res
 
     def test_message_model(self):
         """Does basic model work?"""
