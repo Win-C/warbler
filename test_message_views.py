@@ -6,8 +6,8 @@
 
 import os
 from unittest import TestCase
-
-from models import db, connect_db, Message, User
+from models import db, Message, User
+from app import app, CURR_USER_KEY
 
 # BEFORE we import our app, let's set an environmental variable
 # to use a different database for tests (we need to do this
@@ -18,7 +18,6 @@ os.environ['DATABASE_URL'] = "postgresql:///warbler-test"
 
 # Now we can import app
 
-from app import app, CURR_USER_KEY
 
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 
@@ -134,7 +133,7 @@ class MessageViewTestCase(TestCase):
             self.assertIn("Access unauthorized", str(resp.data))
 
     def test_message_show(self):
-        """ With session, are the currently-logged-in user's messages shown? """
+        """ With session, are currently-logged-in user's messages shown? """
 
         with self.client as c:
             with c.session_transaction() as sess:
