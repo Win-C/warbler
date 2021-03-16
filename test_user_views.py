@@ -266,8 +266,21 @@ class UserViewTestCase(TestCase):
             self.assertNotIn("@testuser3", str(resp.data))
             self.assertNotIn("@testuser4", str(resp.data))
 
-    # def test_users_followers(self):
-    #     """ Display list of followers works? """
+    def test_users_followers(self):
+        """ Display list of followers works? """
+
+        self.setup_followers()
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.testuser_id
+
+            resp = c.get(f"/users/{self.testuser_id}/followers")
+
+            self.assertIn("@testuser1", str(resp.data))
+            self.assertNotIn("@testuser2", str(resp.data))
+            self.assertNotIn("@testuser3", str(resp.data))
+            self.assertNotIn("@testuser4", str(resp.data))
 
     # def test_users_add_follow(self):
     #     """ Does adding a follow for currently-logged-in user work? """
