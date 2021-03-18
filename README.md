@@ -1,6 +1,6 @@
 # Warbler <img src="/static/images/warbler-logo.png" alt="logo" width="50" height="50"> 
 
-Warbler is a miniature clone of the popular social messaging platform, Twitter. Warbler lets you send out messages (or "warbles") that are max 140 characters long. Users can follow/unfollow other users and like/unlike each others' messages.  
+Warbler is a full stack web application and a miniature clone of the popular social messaging platform, Twitter. Warbler lets you send out messages (or "warbles") that are max 140 characters long. Users can follow/unfollow other users and like/unlike each others' messages.  
 
 Check out the deployed app <a href="https://winnie-chou-warbler.herokuapp.com/">here</a>.
 
